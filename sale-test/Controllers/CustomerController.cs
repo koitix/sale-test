@@ -92,7 +92,6 @@ namespace sale_test.Controllers
 
             if (customer != null)
             {
-
                 customer.Name = request.Name;
                 customer.Cpf = request.Cpf;
                 customer.BirthDate = request.BirthDate;
@@ -115,17 +114,17 @@ namespace sale_test.Controllers
             if (customer != null)
             {
                 //remover os orders
-                customer.OrderList = (List<Models.Orders.Order>?)dbContext.Orders.ToList().Where(x=>x.CustomerId == customer.Id.ToString());
-                
-                if(customer.OrderList != null)      
-                foreach(var item in customer.OrderList)
-                {
-                    dbContext.Orders.Remove(item);  
-                }
+                customer.OrderList = (List<Models.Orders.Order>?)dbContext.Orders.ToList().Where(x => x.CustomerId == customer.Id.ToString());
+
+                if (customer.OrderList != null)
+                    foreach (var item in customer.OrderList)
+                    {
+                        dbContext.Orders.Remove(item);
+                    }
 
                 dbContext.Remove(customer);
-               await  dbContext.SaveChangesAsync();
-                return Ok("Customer deleted");    
+                await dbContext.SaveChangesAsync();
+                return Ok("Customer deleted");
             }
 
             return Ok("Not Found");

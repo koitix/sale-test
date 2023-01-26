@@ -89,9 +89,7 @@ namespace sale_test.Controllers
             var order = await dbContext.Orders.FindAsync(id);
 
             if (order != null)
-            {
-
-                
+            {                
                 dbContext.Remove(order);
                 await dbContext.SaveChangesAsync();
                 return Ok("Order deleted");
