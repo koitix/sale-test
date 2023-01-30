@@ -8,6 +8,8 @@ namespace sale_test.Infrastucture
     {
         public CustomersApiDbContext(DbContextOptions options) : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
         }
 
         public DbSet<Customer> Customers { get; set; }

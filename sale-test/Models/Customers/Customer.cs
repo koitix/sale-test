@@ -1,6 +1,7 @@
 ﻿using sale_test.Models.Orders;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace sale_test.Models.Customers
 {
@@ -15,6 +16,7 @@ namespace sale_test.Models.Customers
         [AllowNull]
         public string Email { get; set; }
         [NotMapped]
+        [JsonIgnore]
         public List<Order>? OrderList { get; set; }
 
     }

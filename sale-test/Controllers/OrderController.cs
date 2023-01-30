@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using sale_test.Infrastucture;
+using sale_test.Models.Customers;
 using sale_test.Models.Orders;
 
 namespace sale_test.Controllers
@@ -42,6 +43,18 @@ namespace sale_test.Controllers
         public async Task<IActionResult> AddOrder(AddOrderRequest request)
         {
 
+            var order_list = await dbContext.Orders.ToListAsync();
+            order_list = order_list.FindAll(x => x.CustomerId == request.CustomerId);
+            if (order_list.Any())
+            {
+                foreach (var item in order_list)
+                {
+                    if (item.status == false)
+                    {
+                        return BadRequest("There is some open Order");
+                    }
+                }
+            }
 
             var order = new Order()
             {
@@ -49,9 +62,15 @@ namespace sale_test.Controllers
                 CustomerId = request.CustomerId,
                 Price = request.Price,
                 PaidAt = request.PaidAt,
-                status = request.status
+                status = request.status,
+                CreatedAt = DateTime.Now
 
             };
+
+            if (order.status)
+            {
+                order.PaidAt = DateTime.Now;
+            }
 
             await dbContext.Orders.AddAsync(order);
             await dbContext.SaveChangesAsync();
@@ -59,7 +78,7 @@ namespace sale_test.Controllers
             return Ok(order);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateOrder([FromRoute] Guid id, UpdateOrderRequest request)
         {
@@ -71,8 +90,33 @@ namespace sale_test.Controllers
 
                 order.CustomerId = request.CustomerId;
                 order.Price = request.Price;
-                order.PaidAt = request.PaidAt;
+                if (order.status)
+                {
+                    order.PaidAt = DateTime.Now;
+                }
+                else
+                {
+                    order.PaidAt = request.PaidAt;
+                }
                 order.status = request.status;
+                await dbContext.SaveChangesAsync();
+                return Ok(order);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPut]
+        [Route("UpdatePayOrder/{id:guid}")]
+        public async Task<IActionResult> UpdatePayOrder([FromRoute] Guid id)
+        {
+
+            var order = await dbContext.Orders.FindAsync(id);
+
+            if (order != null)
+            {
+                order.PaidAt = DateTime.Now;
+                order.status = true;
                 await dbContext.SaveChangesAsync();
                 return Ok(order);
             }
@@ -89,10 +133,10 @@ namespace sale_test.Controllers
             var order = await dbContext.Orders.FindAsync(id);
 
             if (order != null)
-            {                
+            {
                 dbContext.Remove(order);
                 await dbContext.SaveChangesAsync();
-                return Ok("Order deleted");
+                return Ok(order);
             }
 
             return Ok("Not Found");
