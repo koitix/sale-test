@@ -20,11 +20,12 @@ namespace sale_test.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCustomers()
         {
-            return Ok(await dbContext.Customers.ToListAsync());
+            var customers = await dbContext.Customers.ToListAsync();
+            return Ok(customers);
         }
 
         [HttpGet]
-        [Route("{id:guid}")]
+        [Route("{id:Guid}")]
         public async Task<IActionResult> GetCustomerById([FromRoute] Guid id)
         {
 
@@ -62,9 +63,8 @@ namespace sale_test.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddCustomer(AddCustomerRequest request)
+        public async Task<IActionResult> AddCustomer([FromBody] AddCustomerRequest request)
         {
-
 
             var customer = new Customer()
             {
@@ -83,8 +83,8 @@ namespace sale_test.Controllers
             return Ok(customer);
         }
 
-        [HttpPost]
-        [Route("{id:guid}")]
+        [HttpPut]
+        [Route("{id:Guid}")]
         public async Task<IActionResult> UpdateCostumer([FromRoute] Guid id, UpdateCustomerRequest request)
         {
 
@@ -114,17 +114,28 @@ namespace sale_test.Controllers
             if (customer != null)
             {
                 //remover os orders
-                customer.OrderList = (List<Models.Orders.Order>?)dbContext.Orders.ToList().Where(x => x.CustomerId == customer.Id.ToString());
+                //customer.OrderList = (List<Models.Orders.Order>?)dbContext.Orders.ToList().Where(x => x.CustomerId == customer.Id.ToString());
+                customer.OrderList = (List<Models.Orders.Order>?)dbContext.Orders.ToList();
+
 
                 if (customer.OrderList != null)
-                    foreach (var item in customer.OrderList)
+                {
+
+                    customer.OrderList = customer.OrderList.FindAll(x => x.CustomerId == id.ToString());
+
+                    if (customer.OrderList.Count > 0)
                     {
-                        dbContext.Orders.Remove(item);
+
+                        foreach (var item in customer.OrderList)
+                        {
+                            dbContext.Orders.Remove(item);
+                        }
                     }
+                }
 
                 dbContext.Remove(customer);
                 await dbContext.SaveChangesAsync();
-                return Ok("Customer deleted");
+                return Ok(customer);
             }
 
             return Ok("Not Found");

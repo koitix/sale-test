@@ -1,4 +1,6 @@
-﻿namespace sale_test.Models.Orders
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace sale_test.Models.Orders
 {
     public class Order
     {
@@ -6,7 +8,7 @@
         public string CustomerId { get; set; }
         public decimal Price { get; set; }
         public bool status { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime PaidAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? PaidAt { get; set; }
     }
 }
